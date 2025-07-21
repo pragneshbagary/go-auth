@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pragneshbagary/go-Auth/internal/jwtutils"
-	"github.com/pragneshbagary/go-Auth/pkg/models"
-	"github.com/pragneshbagary/go-Auth/pkg/storage"
+	"github.com/pragneshbagary/go-auth/internal/jwtutils"
+	"github.com/pragneshbagary/go-auth/pkg/models"
+	"github.com/pragneshbagary/go-auth/pkg/storage"
 
 	"github.com/google/uuid"
 )

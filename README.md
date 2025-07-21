@@ -1,8 +1,8 @@
-# Go-Auth: A Secure and Modern Authentication Package for Go
+# go-auth: A Secure and Modern Authentication Package for Go
 
 ## Description
 
-Go-Auth is a production-ready Go package designed to simplify user authentication. It provides a high-level API for secure user registration and login, built on modern cryptographic standards like Argon2id and JWT.
+go-auth is a production-ready Go package designed to simplify user authentication. It provides a high-level API for secure user registration and login, built on modern cryptographic standards like Argon2id and JWT.
 
 This package is designed to be both easy to use for beginners and flexible enough for experienced developers. It handles the complexities of password hashing, token generation, and token refreshment, allowing you to focus on your application's core logic.
 
@@ -24,12 +24,12 @@ This package is designed to be both easy to use for beginners and flexible enoug
 ### Installation
 
 ```bash
-go get github.com/pragneshbagary/go-Auth
+go get github.com/pragneshbagary/go-auth
 ```
 
 ### Usage
 
-Using Go-Auth involves three main steps: configuring the services, registering a user, and logging in.
+Using go-auth involves three main steps: configuring the services, registering a user, and logging in.
 
 **1. Initialization**
 

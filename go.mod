@@ -1,4 +1,4 @@
-module github.com/pragneshbagary/go-Auth
+module github.com/pragneshbagary/go-auth
 
 go 1.24.3
 

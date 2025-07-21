@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/pragneshbagary/go-Auth/pkg/models"
+import "github.com/pragneshbagary/go-auth/pkg/models"
 
 // Storage defines the interface for data storage operations.
 // This allows the auth service to be independent of the database implementation,

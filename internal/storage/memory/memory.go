@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/pragneshbagary/go-Auth/pkg/models"
+	"github.com/pragneshbagary/go-auth/pkg/models"
 )
 
 // InMemoryStorage is a simple, thread-safe, in-memory implementation of the storage.Storage interface.

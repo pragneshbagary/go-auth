@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/pragneshbagary/go-Auth/internal/jwtutils"
-	"github.com/pragneshbagary/go-Auth/internal/storage/memory"
-	"github.com/pragneshbagary/go-Auth/pkg/auth"
+	"github.com/pragneshbagary/go-auth/internal/jwtutils"
+	"github.com/pragneshbagary/go-auth/internal/storage/memory"
+	"github.com/pragneshbagary/go-auth/pkg/auth"
 )
 
 func main() {
