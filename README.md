@@ -67,7 +67,7 @@ loginResponse, err := authService.Login("testuser", "StrongPassword123!", custom
 ---
 ## Example
 
-A complete, runnable example demonstrating the full registration and login flow is available in the `main.go` file in the root of the repository.
+A complete, runnable example demonstrating the full registration and login flow is available in the `main.go` file in the examples folder.
 
 ---
 
