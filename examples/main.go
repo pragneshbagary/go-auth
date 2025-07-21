@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/pragneshbagary/go-auth/internal/jwtutils"
 	"github.com/pragneshbagary/go-auth/internal/storage/memory"
 	"github.com/pragneshbagary/go-auth/pkg/auth"
 )
@@ -13,25 +12,22 @@ import (
 func main() {
 	fmt.Println("--- High-Level Auth Service Example ---")
 
-	// 1. Setup: Initialize all the components.
-
-	// The in-memory storage is for this example.
-	// In a real application, you would plug in a real database implementation here.
-	storage := memory.NewInMemoryStorage()
-
-	// The JWT manager from your internal package.
-	jwtConfig := jwtutils.JWTConfig{
-		AccessSecret:    []byte("example-access-secret"),
-		RefreshSecret:   []byte("example-refresh-secret"),
-		Issuer:          "go-auth-example",
-		AccessTokenTTL:  15 * time.Minute,
-		RefreshTokenTTL: 7 * 24 * time.Hour,
-		SigningMethod:   jwtutils.HS256,
+	// 1. Setup: Initialize all the components using the unified Config.
+	cfg := auth.Config{
+		Storage: memory.NewInMemoryStorage(), // Use your own DB implementation here
+		JWT: auth.JWTConfig{
+			AccessSecret:    []byte("your-super-secret-access-key"),
+			RefreshSecret:   []byte("your-super-secret-refresh-key"),
+			Issuer:          "my-awesome-app",
+			AccessTokenTTL:  15 * time.Minute,
+			RefreshTokenTTL: 7 * 24 * time.Hour,
+			SigningMethod:   auth.HS256,
+		},
 	}
-	jwtManager := jwtutils.NewJWTManager(jwtConfig)
-
-	// The high-level authentication service.
-	authService := auth.NewAuthService(storage, jwtManager)
+	authService, err := auth.NewAuthService(cfg)
+	if err != nil {
+		log.Fatalf("Failed to create AuthService: %v", err)
+	}
 
 	// 2. Register a new user using the new payload struct.
 	fmt.Println("\n--- Registering a new user... ---")
@@ -63,7 +59,7 @@ func main() {
 
 	// 4. Validate the token and inspect the claims.
 	fmt.Println("\n--- Validating the received access token... ---")
-	claims, err := jwtManager.ValidateAccessToken(loginResponse.AccessToken)
+	claims, err := authService.ValidateAccessToken(loginResponse.AccessToken)
 	if err != nil {
 		log.Fatalf("Token validation failed: %v", err)
 	}

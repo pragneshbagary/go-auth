@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +17,7 @@ func setupTestManager(t *testing.T) TokenManager {
 		Issuer:          "test-issuer",
 		AccessTokenTTL:  5 * time.Minute,
 		RefreshTokenTTL: 1 * time.Hour,
-		SigningMethod:   HS256,
+		SigningMethod:   jwt.SigningMethodHS256.Alg(),
 	}
 	return NewJWTManager(cfg)
 }
@@ -79,7 +80,7 @@ func TestExpiredTokenValidation(t *testing.T) {
 		AccessSecret:   []byte("short-lived-secret"),
 		Issuer:         "test-expiry",
 		AccessTokenTTL: 1 * time.Millisecond, // Practically instant expiry
-		SigningMethod:  HS256,
+		SigningMethod:  jwt.SigningMethodHS256.Alg(),
 	}
 	tm := NewJWTManager(cfg)
 
@@ -110,7 +111,7 @@ func TestInvalidTokenErrors(t *testing.T) {
 	// 3. Try to validate a token with the wrong secret
 	otherManager := NewJWTManager(JWTConfig{
 		AccessSecret:  []byte("a-different-secret"),
-		SigningMethod: HS256,
+		SigningMethod: jwt.SigningMethodHS256.Alg(),
 	})
 	tokenFromOther, _ := otherManager.GenerateAccessToken("user-222", nil)
 	_, err = tm.ValidateAccessToken(tokenFromOther)

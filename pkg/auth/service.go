@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/pragneshbagary/go-auth/internal/jwtutils"
 	"github.com/pragneshbagary/go-auth/pkg/models"
 	"github.com/pragneshbagary/go-auth/pkg/storage"
@@ -19,13 +20,32 @@ type AuthService struct {
 	jwtManager jwtutils.TokenManager
 }
 
-// NewAuthService creates a new AuthService.
-// It requires a storage implementation and a JWT manager.
-func NewAuthService(storage storage.Storage, jwtManager jwtutils.TokenManager) *AuthService {
-	return &AuthService{
-		storage:    storage,
-		jwtManager: jwtManager,
+// NewAuthService creates a new AuthService from a configuration.
+// This is the main entry point for the library.
+func NewAuthService(cfg Config) (*AuthService, error) {
+	// Internal validation of the config
+	if cfg.Storage == nil {
+		return nil, errors.New("storage implementation cannot be nil")
 	}
+	if cfg.JWT.AccessSecret == nil || cfg.JWT.RefreshSecret == nil {
+		return nil, errors.New("JWT access and refresh secrets must be provided")
+	}
+
+	// Create the internal JWT manager from the public config.
+	// The user of the library no longer needs to know about jwtutils.
+	jwtManager := jwtutils.NewJWTManager(jwtutils.JWTConfig{
+		AccessSecret:    cfg.JWT.AccessSecret,
+		RefreshSecret:   cfg.JWT.RefreshSecret,
+		Issuer:          cfg.JWT.Issuer,
+		AccessTokenTTL:  cfg.JWT.AccessTokenTTL,
+		RefreshTokenTTL: cfg.JWT.RefreshTokenTTL,
+		SigningMethod:   cfg.JWT.SigningMethod,
+	})
+
+	return &AuthService{
+		storage:    cfg.Storage,
+		jwtManager: jwtManager,
+	}, nil
 }
 
 // RegisterPayload defines the data required to register a new user.
@@ -115,4 +135,16 @@ func (s *AuthService) Login(username, password string, customClaims map[string]i
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+// ValidateAccessToken validates an access token string.
+// It returns the claims if the token is valid, otherwise an error.
+func (s *AuthService) ValidateAccessToken(tokenString string) (jwt.MapClaims, error) {
+	return s.jwtManager.ValidateAccessToken(tokenString)
+}
+
+// ValidateRefreshToken validates a refresh token string.
+// It returns the claims if the token is valid, otherwise an error.
+func (s *AuthService) ValidateRefreshToken(tokenString string) (jwt.MapClaims, error) {
+	return s.jwtManager.ValidateRefreshToken(tokenString)
 }

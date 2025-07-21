@@ -42,8 +42,23 @@ Using go-auth involves three main steps: configuring the services, registering a
 ```go
 // Configure and create the required services.
 storage := memory.NewInMemoryStorage() // Use your own DB implementation here
-jwtManager := jwtutils.NewJWTManager(jwtConfig) // See Configuration section below
-authService := auth.NewAuthService(storage, jwtManager)
+
+// Configure the AuthService with your JWT settings and storage.
+cfg := auth.Config{
+	Storage: storage,
+	JWT: auth.JWTConfig{
+		AccessSecret:    []byte("your-super-secret-access-key"),
+		RefreshSecret:   []byte("your-super-secret-refresh-key"),
+		Issuer:          "my-awesome-app",
+		AccessTokenTTL:  15 * time.Minute,
+		RefreshTokenTTL: 7 * 24 * time.Hour,
+		SigningMethod:   auth.HS256,
+	},
+}
+authService, err := auth.NewAuthService(cfg)
+if err != nil {
+	log.Fatalf("Failed to create AuthService: %v", err)
+}
 ```
 
 **2. Register a New User**
@@ -73,10 +88,10 @@ A complete, runnable example demonstrating the full registration and login flow 
 
 ## Configuration
 
-To use the JWT manager, you must provide a `JWTConfig` struct. This allows you to configure the secrets and token lifespans.
+To configure the JWT settings for the `AuthService`, you will use the `auth.JWTConfig` struct within the main `auth.Config`.
 
 ```go
-jwtConfig := jwtutils.JWTConfig{
+jwtConfig := auth.JWTConfig{
     // A secret key for signing access tokens. Keep this private.
     AccessSecret:    []byte("your-super-secret-access-key"),
 
@@ -92,8 +107,8 @@ jwtConfig := jwtutils.JWTConfig{
     // The lifespan of a refresh token (e.g., 7 days).
     RefreshTokenTTL: 7 * 24 * time.Hour,
 
-    // The signing method to use (e.g., HS256, RS256).
-    SigningMethod:   jwtutils.HS256,
+    // The signing method to use (e.g., auth.HS256, auth.RS256).
+    SigningMethod:   auth.HS256,
 }
 ```
 ⚠️ Note: The credentials and secrets are for demonstration purposes only. Never use hardcoded or weak secrets in production.

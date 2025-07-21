@@ -16,8 +16,8 @@ type JWTConfig struct {
 }
 
 var signingMethods = map[string]jwt.SigningMethod{
-	HS256: jwt.SigningMethodHS256,
-	HS384: jwt.SigningMethodHS384,
-	HS512: jwt.SigningMethodHS512,
-	RS256: jwt.SigningMethodRS256,
+	"HS256": jwt.SigningMethodHS256,
+	"HS384": jwt.SigningMethodHS384,
+	"HS512": jwt.SigningMethodHS512,
+	"RS256": jwt.SigningMethodRS256,
 }
