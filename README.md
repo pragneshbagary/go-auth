@@ -2,7 +2,7 @@
 
 ## Current Version
 
-**v0.1.0**
+![version](https://img.shields.io/github/v/tag/pragneshbagary/go-Auth?label=version)
 
 ---
 
