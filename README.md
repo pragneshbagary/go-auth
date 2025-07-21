@@ -90,6 +90,7 @@ jwtConfig := jwtutils.JWTConfig{
     SigningMethod:   jwtutils.HS256,
 }
 ```
+⚠️ Note: The credentials and secrets are for demonstration purposes only. Never use hardcoded or weak secrets in production.
 
 ---
 
