@@ -499,7 +499,7 @@ go test ./pkg/auth -run TestPerformance
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Contributions are welcomed! Please see [Contributing Guide](CONTRIBUTING.md) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -512,14 +512,6 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-## 🙏 Acknowledgments
-
-- Thanks to all contributors who made this release possible
-- Inspired by modern authentication best practices
-- Built with security and developer experience in mind
 
 ---
 
