@@ -403,7 +403,7 @@ authService, err := auth.NewAuthService(cfg)
 
 ### Migration Tools
 
-Use our automated migration tool:
+Use the automated migration tool:
 
 ```bash
 go install github.com/pragneshbagary/go-auth/cmd/migrate@v2.0.0
@@ -412,13 +412,13 @@ migrate -path . -output migration-report.txt
 
 ### Migration Guide
 
-See our comprehensive [Migration Guide](MIGRATION.md) for detailed instructions.
+See the comprehensive [Migration Guide](MIGRATION.md) for detailed instructions.
 
 ---
 
 ## 📚 Examples
 
-Explore our comprehensive examples:
+Explore the comprehensive examples:
 
 - [Basic Usage](examples/basic_usage_example.go)
 - [Advanced Features](examples/advanced_usage_example.go)
