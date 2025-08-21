@@ -1,126 +1,488 @@
-# go-auth: A Secure and Modern Authentication Package for Go
+# 🔐 go-auth v2.0.0: Modern Authentication for Go
 
-## Current Version
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.19-blue.svg)](https://golang.org/)
+[![Version](https://img.shields.io/github/v/tag/pragneshbagary/go-auth?label=version&color=green)](https://github.com/pragneshbagary/go-auth/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/pragneshbagary/go-auth)](https://goreportcard.com/report/github.com/pragneshbagary/go-auth)
+[![Documentation](https://pkg.go.dev/badge/github.com/pragneshbagary/go-auth.svg)](https://pkg.go.dev/github.com/pragneshbagary/go-auth)
 
-![version](https://img.shields.io/github/v/tag/pragneshbagary/go-Auth?label=version)
-
----
-
-## Description
-
-go-auth is a production-ready Go package designed to simplify user authentication. It provides a high-level API for secure user registration and login, built on modern cryptographic standards like Argon2id and JWT.
-
-This package is designed to be both easy to use for beginners and flexible enough for experienced developers. It handles the complexities of password hashing, token generation, and token refreshment, allowing you to focus on your application's core logic.
+**A production-ready, feature-rich authentication library for Go applications with zero breaking changes from v1.**
 
 ---
 
-## Features
+## 🚀 What's New in v2.0.0
 
-- **Secure Password Hashing**: Uses **Argon2id**, the modern, recommended standard for password hashing.
-- **JSON Web Tokens (JWT)**: Implements a robust JWT system with short-lived access tokens and long-lived refresh tokens.
-- **Clean, High-Level API**: Offers simple `Register` and `Login` functions that abstract away complexity.
-- **Database Agnostic**: Uses a `Storage` interface, allowing you to plug in any database backend.
-- **Extensible and Configurable**: Easily add custom claims to JWTs and configure token lifespans.
-- **Thoroughly Tested**: Includes a comprehensive test suite to ensure reliability and security.
+- ✨ **Simplified API** with intuitive constructors
+- 🏗️ **Component-based architecture** (Users, Tokens, Middleware)
+- 🔧 **Enhanced configuration** with environment variable support
+- 🚀 **Framework-specific middleware** (Gin, Echo, Fiber)
+- 📊 **Built-in monitoring, metrics, and health checks**
+- 🔒 **Advanced security features** and best practices
+- 🔄 **Automatic database migration** system
+- 📚 **Comprehensive documentation** and examples
+- 🔙 **Full backward compatibility** with v1
+- 🛠️ **Automated migration tools**
+
+**🎉 Zero Breaking Changes!** Your existing v1 code continues to work without modification.
 
 ---
 
-## Getting Started
-
-### Installation
+## 📦 Installation
 
 ```bash
-go get github.com/pragneshbagary/go-auth
+go get github.com/pragneshbagary/go-auth@v2.0.0
 ```
 
-### Usage
+---
 
-Using go-auth involves three main steps: configuring the services, registering a user, and logging in.
+## ⚡ Quick Start
 
-**1. Initialization**
+### Simple Setup (New v2 API)
 
 ```go
-// Configure and create the required services.
-storage := memory.NewInMemoryStorage() // Use your own DB implementation here
+package main
 
-// Configure the AuthService with your JWT settings and storage.
+import (
+    "log"
+    "github.com/pragneshbagary/go-auth/pkg/auth"
+)
+
+func main() {
+    // Initialize with SQLite database
+    authService, err := auth.New("auth.db", "your-jwt-secret")
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Register a user
+    user, err := authService.Register(auth.RegisterRequest{
+        Username: "alice",
+        Email:    "alice@example.com",
+        Password: "secure_password123",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Login with custom claims
+    loginResult, err := authService.Login("alice", "secure_password123", map[string]interface{}{
+        "role": "admin",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Validate access token
+    claims, err := authService.ValidateAccessToken(loginResult.AccessToken)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Refresh tokens
+    refreshResult, err := authService.RefreshToken(loginResult.RefreshToken)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Advanced user management
+    users := authService.Users()
+    profile, err := users.Get(user.ID)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Advanced token management
+    tokens := authService.Tokens()
+    err = tokens.Revoke(refreshResult.AccessToken)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+### Even Simpler Setup
+
+```go
+// For quick prototyping
+auth, err := auth.Quick("your-jwt-secret")
+
+// Load configuration from environment
+authService, err := auth.NewFromEnv()
+```
+
+---
+
+## 🏗️ Component-Based Architecture
+
+### Users Component
+
+```go
+users := authService.Users()
+
+// Get user profile (safe, no sensitive data)
+profile, err := users.Get(userID)
+profile, err := users.GetByEmail("user@example.com")
+profile, err := users.GetByUsername("username")
+
+// Update user profile
+err = users.Update(userID, auth.UserUpdate{
+    Email: &newEmail,
+    Metadata: map[string]interface{}{
+        "role": "admin",
+        "department": "engineering",
+    },
+})
+
+// Change password
+err = users.ChangePassword(userID, oldPassword, newPassword)
+
+// Password reset workflow
+resetToken, err := users.CreateResetToken("user@example.com")
+err = users.ResetPassword(resetToken.Token, newPassword)
+
+// List users
+userList, err := users.List(10, 0)
+err = users.Delete(userID)
+```
+
+### Tokens Component
+
+```go
+tokens := authService.Tokens()
+
+// Advanced token validation
+user, err := tokens.Validate(accessToken)
+isValid := tokens.IsValid(accessToken)
+
+// Batch validation for performance
+results := tokens.ValidateBatch([]string{token1, token2, token3})
+
+// Token refresh with automatic rotation
+refreshResult, err := tokens.Refresh(refreshToken)
+
+// Token revocation
+err = tokens.Revoke(accessToken)           // Single token
+err = tokens.RevokeAll(userID)             // All user tokens
+
+// Session management
+sessions, err := tokens.ListActiveSessions(userID)
+sessionInfo, err := tokens.GetSessionInfo(accessToken)
+
+// Cleanup
+err = tokens.CleanupExpired()
+```
+
+---
+
+## 🚀 Framework Integration
+
+### Gin
+
+```go
+r := gin.Default()
+middleware := authService.Middleware()
+
+// Protected routes
+protected := r.Group("/api/protected")
+protected.Use(middleware.Gin())
+{
+    protected.GET("/profile", func(c *gin.Context) {
+        // User automatically injected into context
+        user, ok := auth.GetUserFromGin(c)
+        if !ok {
+            c.JSON(500, gin.H{"error": "User not found"})
+            return
+        }
+        c.JSON(200, gin.H{"user": user})
+    })
+}
+
+// Optional authentication
+r.GET("/api/optional", middleware.GinOptional(), handler)
+```
+
+### Echo
+
+```go
+e := echo.New()
+middleware := authService.Middleware()
+
+protected := e.Group("/api/protected")
+protected.Use(middleware.Echo())
+
+protected.GET("/profile", func(c echo.Context) error {
+    user, ok := auth.GetUserFromEcho(c)
+    if !ok {
+        return c.JSON(500, map[string]string{"error": "User not found"})
+    }
+    return c.JSON(200, map[string]interface{}{"user": user})
+})
+```
+
+### Fiber
+
+```go
+app := fiber.New()
+middleware := authService.Middleware()
+
+protected := app.Group("/api/protected")
+protected.Use(middleware.Fiber())
+
+protected.Get("/profile", func(c *fiber.Ctx) error {
+    user, ok := auth.GetUserFromFiber(c)
+    if !ok {
+        return c.Status(500).JSON(fiber.Map{"error": "User not found"})
+    }
+    return c.JSON(fiber.Map{"user": user})
+})
+```
+
+### Standard HTTP
+
+```go
+mux := http.NewServeMux()
+
+// Protected endpoint
+mux.Handle("/protected", authService.Protect(protectedHandler))
+mux.Handle("/optional", authService.Optional(optionalHandler))
+```
+
+---
+
+## 🔧 Configuration Options
+
+### Environment Variables
+
+Create a `.env` file or set environment variables:
+
+```bash
+AUTH_JWT_ACCESS_SECRET="your-access-secret"
+AUTH_JWT_REFRESH_SECRET="your-refresh-secret"
+AUTH_DB_TYPE="sqlite"
+AUTH_DB_URL="auth.db"
+AUTH_JWT_ISSUER="my-app"
+AUTH_ACCESS_TOKEN_TTL="15m"
+AUTH_REFRESH_TOKEN_TTL="168h"
+AUTH_APP_NAME="My Application"
+AUTH_LOG_LEVEL="info"
+```
+
+Then use:
+
+```go
+// Automatically loads from environment
+authService, err := auth.NewFromEnv()
+```
+
+### Advanced Configuration
+
+```go
+config := &auth.AuthConfig{
+    DatabasePath:     "auth.db",
+    JWTSecret:        "your-jwt-secret",
+    JWTRefreshSecret: "your-refresh-secret",
+    JWTIssuer:        "my-app",
+    AccessTokenTTL:   15 * time.Minute,
+    RefreshTokenTTL:  7 * 24 * time.Hour,
+    AppName:          "My Application",
+    Version:          "1.0.0",
+    LogLevel:         "info",
+}
+
+authService, err := auth.NewWithConfig(config)
+```
+
+---
+
+## 📊 Monitoring & Health Checks
+
+```go
+// Health checks
+err := authService.Health()
+info := authService.GetSystemInfo()
+
+// Metrics
+metrics := authService.GetMetrics()
+collector := authService.MetricsCollector()
+loginRate := collector.GetLoginSuccessRate()
+
+// Structured logging
+logger := authService.Logger()
+logger.Info("Custom operation", map[string]interface{}{
+    "user_id": userID,
+    "operation": "login",
+})
+
+// HTTP endpoints for monitoring
+mux := http.NewServeMux()
+mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+    if err := authService.Health(); err != nil {
+        http.Error(w, err.Error(), http.StatusServiceUnavailable)
+        return
+    }
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+})
+```
+
+---
+
+## 🗄️ Database Support
+
+### SQLite (Default)
+
+```go
+authService, err := auth.NewSQLite("auth.db", "jwt-secret")
+```
+
+### PostgreSQL
+
+```go
+authService, err := auth.NewPostgres("postgres://user:pass@localhost/db", "jwt-secret")
+```
+
+### In-Memory (Testing)
+
+```go
+authService, err := auth.NewInMemory("jwt-secret")
+```
+
+---
+
+## 🔄 Migration from v1
+
+### Automatic Compatibility
+
+Your existing v1 code continues to work:
+
+```go
+// v1 code still works!
 cfg := auth.Config{
-	Storage: storage,
-	JWT: auth.JWTConfig{
-		AccessSecret:    []byte("your-super-secret-access-key"),
-		RefreshSecret:   []byte("your-super-secret-refresh-key"),
-		Issuer:          "my-awesome-app",
-		AccessTokenTTL:  15 * time.Minute,
-		RefreshTokenTTL: 7 * 24 * time.Hour,
-		SigningMethod:   auth.HS256,
-	},
+    Storage: storage,
+    JWT: auth.JWTConfig{
+        AccessSecret: []byte("secret"),
+        // ... v1 config
+    },
 }
+
 authService, err := auth.NewAuthService(cfg)
-if err != nil {
-	log.Fatalf("Failed to create AuthService: %v", err)
-}
 ```
 
-**2. Register a New User**
+### Migration Tools
 
-```go
-registerPayload := auth.RegisterPayload{
-	Username: "testuser",
-	Email:    "test@example.com",
-	Password: "StrongPassword123!",
-}
-user, err := authService.Register(registerPayload)
+Use our automated migration tool:
+
+```bash
+go install github.com/pragneshbagary/go-auth/cmd/migrate@v2.0.0
+migrate -path . -output migration-report.txt
 ```
 
-**3. Log In**
+### Migration Guide
 
-```go
-customClaims := map[string]interface{}{"role": "admin"}
-loginResponse, err := authService.Login("testuser", "StrongPassword123!", customClaims)
-```
-
----
-## Example
-
-A complete, runnable example demonstrating the full registration and login flow is available in the `main.go` file in the examples folder.
+See our comprehensive [Migration Guide](MIGRATION.md) for detailed instructions.
 
 ---
 
-## Configuration
+## 📚 Examples
 
-To configure the JWT settings for the `AuthService`, you will use the `auth.JWTConfig` struct within the main `auth.Config`.
+Explore our comprehensive examples:
 
-```go
-jwtConfig := auth.JWTConfig{
-    // A secret key for signing access tokens. Keep this private.
-    AccessSecret:    []byte("your-super-secret-access-key"),
+- [Basic Usage](examples/basic_usage_example.go)
+- [Advanced Features](examples/advanced_usage_example.go)
+- [Framework Integration](examples/)
+- [Middleware Usage](examples/middleware_example.go)
+- [Error Handling](examples/error_handling_example.go)
+- [Token Management](examples/token_management_example.go)
+- [User Management](examples/users_management_example.go)
+- [Migration Examples](examples/migration_example.go)
 
-    // A separate secret key for signing refresh tokens.
-    RefreshSecret:   []byte("your-super-secret-refresh-key"),
+---
 
-    // The issuer name for your application (e.g., "my-awesome-app").
-    Issuer:          "my-awesome-app",
+## 🔒 Security Features
 
-    // The lifespan of an access token (e.g., 15 minutes).
-    AccessTokenTTL:  15 * time.Minute,
+- **Argon2id Password Hashing** - Industry-standard secure hashing
+- **JWT with Refresh Tokens** - Secure token-based authentication
+- **SQL Injection Protection** - Parameterized queries and input validation
+- **Timing Attack Resistance** - Constant-time comparisons
+- **Rate Limiting Support** - Built-in protection against brute force
+- **Secure Token Storage** - Automatic token revocation and cleanup
+- **Input Validation** - Comprehensive validation for all inputs
+- **Security Headers** - Automatic security header management
 
-    // The lifespan of a refresh token (e.g., 7 days).
-    RefreshTokenTTL: 7 * 24 * time.Hour,
+---
 
-    // The signing method to use (e.g., auth.HS256, auth.RS256).
-    SigningMethod:   auth.HS256,
-}
+## 🚀 Performance
+
+- **Connection Pooling** - Automatic database connection management
+- **Batch Operations** - Efficient batch token validation
+- **Caching Support** - Optional Redis caching for improved performance
+- **Optimized Queries** - Efficient database operations
+- **Memory Management** - Optimized memory usage and cleanup
+
+---
+
+## 🧪 Testing
+
+Run the comprehensive test suite:
+
+```bash
+# Unit tests
+go test ./...
+
+# With coverage
+go test ./... -cover
+
+# Race condition testing
+go test ./... -race
+
+# Benchmarks
+go test ./... -bench=.
 ```
-⚠️ Note: The credentials and secrets are for demonstration purposes only. Never use hardcoded or weak secrets in production.
 
 ---
 
-## Contributing
+## 📖 Documentation
 
-Contributions are welcome! If you find a bug or have a feature request, please open an issue. If you would like to contribute code, please fork the repository and create a pull request.
+- [API Documentation](https://pkg.go.dev/github.com/pragneshbagary/go-auth)
+- [Migration Guide](MIGRATION.md)
+- [Examples](examples/)
+- [Release Notes](https://github.com/pragneshbagary/go-auth/releases)
 
 ---
 
-## License
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🙏 Acknowledgments
+
+- Thanks to all contributors who made this release possible
+- Inspired by modern authentication best practices
+- Built with security and developer experience in mind
+
+---
+
+## 📞 Support
+
+- 📖 [Documentation](https://pkg.go.dev/github.com/pragneshbagary/go-auth)
+- 🐛 [Issue Tracker](https://github.com/pragneshbagary/go-auth/issues)
+- 💬 [Discussions](https://github.com/pragneshbagary/go-auth/discussions)
+- 📧 [Email Support](mailto:pragneshbagary1699@gmail.com)
+
+---
+
+**⭐ If you find go-auth useful, please consider giving it a star on GitHub!**
