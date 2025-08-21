@@ -14,6 +14,55 @@
 
 # Output of the go coverage tool
 *.out
+coverage*.out
 
 # Dependency directories (if you vendor)
 vendor/
+
+# Kiro IDE files
+.kiro/
+
+# Build artifacts
+migrate-tool
+migrate.sh
+migration-report.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# SQLite databases (for testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Release and development scripts (keep in repo but ignore generated files)
+# Keep the scripts but ignore any generated outputs
+
+# Documentation that shouldn't be in the main repo
+RELEASE_COMPLETE.md
+FINAL_RELEASE_STATUS.md
+RELEASE_SUMMARY.md
+RELEASE_CHECKLIST.md
+
+# Development and release scripts (these are for maintainers only)
+release-master.sh
+quick-release.sh
+release-v2.sh
+spread-commits.sh
+prepare-release.sh
